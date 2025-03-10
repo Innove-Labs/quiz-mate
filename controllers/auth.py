@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException
-from schemas.auth_schema import Token, UserCreate, UserLogin
-from utils.auth_utils import hash_password, create_access_token, verify_password
+from fastapi import APIRouter, HTTPException, Depends
+from schemas.auth_schema import Token, UserCreate, UserLogin, GetUserResponse
+from utils.auth_utils import hash_password, create_access_token, verify_password, get_current_user
 from database.models import User
 from datetime import datetime
 
 router = APIRouter()
 
 
-@router.post("/auth/signup", response_model=Token)
+@router.post("/signup", response_model=Token)
 async def signup(user_data: UserCreate):
     existing_user = await User.find_one(User.email == user_data.email)
     if existing_user:
@@ -28,7 +28,7 @@ async def signup(user_data: UserCreate):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/auth/login", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login(user_data: UserLogin):
     user = await User.find_one(User.email == user_data.email)
     if not user or not verify_password(user_data.password, user.password_hash):
@@ -36,3 +36,7 @@ async def login(user_data: UserLogin):
 
     access_token = create_access_token({"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=GetUserResponse)
+async def get_logged_user(current_user: User = Depends(get_current_user)):
+    return current_user
