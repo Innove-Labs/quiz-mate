@@ -1,7 +1,10 @@
+import { Button } from "@/components/ui/button"
+import StudyMaterialsFilter from "@/custom-components/StudyMaterialsFilter"
+
 export const StudyMaterials = () => {
     return (
         <div>
-            <h1>Study Materials</h1>
+            <StudyMaterialsFilter />
         </div>
     )
 }

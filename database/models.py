@@ -1,16 +1,16 @@
 from array import ArrayType
 
-from beanie import Document, Link
-from pydantic import BaseModel, EmailStr
+from beanie import Document, Link, Indexed
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
 # ----------------- User Schema (Teachers & Students) -----------------
 class User(Document):
     name: str
-    email: str
+    email: Indexed(str, unique=True)
     password_hash: str
-    user_name: str
+    user_name: Indexed(str, unique=True)
     role: str
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
@@ -23,6 +23,8 @@ class Subject(Document):
     name: str
     teacher: Link[User]
     created_at: datetime = datetime.utcnow()
+    description: Optional[str]
+    updated_at: datetime = datetime.utcnow()
 
     class Settings:
         collection = "subjects"
@@ -32,6 +34,8 @@ class Grade(Document):
     name: str
     teacher: Link[User]
     created_at: datetime = datetime.utcnow()
+    description: Optional[str]
+    updated_at: datetime = datetime.utcnow()
 
     class Settings:
         collection = "classes"

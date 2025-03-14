@@ -17,6 +17,7 @@ export interface IAuthStore {
     error: string | null;
     login: (email: string, password: string) => void;
     checkUser: () => void;
+    signup: (email: string, password: string, username: string, role: "teacher" | "student", name: string) => void;
 }
 
 export const useAuthStore = create<IAuthStore>((
@@ -25,7 +26,10 @@ export const useAuthStore = create<IAuthStore>((
 ) => ({
     user: null,
     setUser: (user) => set({ user }),
-    logout: () => set({ user: null }),
+    logout: () => {
+        set({ user: null, isLoggedIn: false });
+        localStorage.removeItem("token");
+    },
     login: async (email: string, password: string) => {
         set({ loading: true, error: null });
         try {
@@ -56,6 +60,24 @@ export const useAuthStore = create<IAuthStore>((
             set({ user: response.data, isLoggedIn: true, loading: false });
         } catch (error: any) {
             set({ loading: false });
+        }
+    },
+    signup: async (email: string, password: string, username: string, role: "teacher" | "student", name: string) => {
+        set({ loading: true, error: null });
+        try {
+            await axiosInstance.post("/api/auth/signup", {
+                name,
+                email,
+                password,
+                user_name: username,
+                role,
+            });
+            set({ loading: false });
+        } catch (error: any) {
+            set({
+                error: error.response?.data?.message || "Signup failed",
+                loading: false,
+            });
         }
     },
     isLoggedIn: false,
